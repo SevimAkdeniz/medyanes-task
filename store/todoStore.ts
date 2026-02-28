@@ -45,21 +45,20 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     }
   },
 
-  addTodo: async (body) => {
-    set({ loading: true, error: null });
-    try {
-      const created = await postApi<Todo, CreateTodoBody>("/api/todos", {
-        title: body.title,
-        description: body.description ?? null,
-        status: body.status ?? "pending",
-      });
+  addTodo: async (todo) => {
+  try {
+    const res = await fetch("/api/todos", {
+      method: "POST",
+      body: JSON.stringify(todo),
+    });
 
-      // state güncelle
-      set((state) => ({ todos: [created, ...state.todos], loading: false }));
-    } catch (e: any) {
-      set({ error: e.message ?? "Hata", loading: false });
-    }
-  },
+    if (!res.ok) throw new Error("Eklenemedi");
+
+    await get().fetchTodos(); // 🔥 BURASI ÖNEMLİ
+  } catch (err) {
+    set({ error: "Todo eklenemedi" });
+  }
+},
 
   updateTodo: async (id, body) => {
     set({ loading: true, error: null });
